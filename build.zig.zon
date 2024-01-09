@@ -1,0 +1,29 @@
+.{
+    .name = "LogicSimulator",
+    // This is a [Semantic Version](https://semver.org/).
+    // In a future version of Zig it will be used for package deduplication.
+    .version = "0.0.0",
+
+    .dependencies = .{
+        .ziglua = .{
+            // Use a tagged release of Ziglua tracking a stable Zig release
+            //.url = "https://github.com/natecraddock/ziglua/archive/refs/tags/0.2.0.tar.gz",
+
+            // Or a url with a hash for a specific Ziglua commit
+            .url = "https://github.com/natecraddock/ziglua/archive/ab111adb06d2d4dc187ee9e1e352617ca8659155.tar.gz",
+            .hash = "12206cf9e90462ee6e14f593ea6e0802b9fe434429ba10992a1451e32900f741005c",
+        },
+    },
+    .paths = .{
+        "build.zig",
+        "build.zig.zon",
+        "src/main.zig",
+        "src/String.zig",
+        "src/LinkedList.zig",
+        "src/Key.zig",
+        "src/index.zig",
+        "src/GameContext.zig",
+        ".build_config/",
+        "SDL.zig/Sdk.zig",
+    },
+}

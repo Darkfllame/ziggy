@@ -1,0 +1,6 @@
+**/zig-out/
+**/zig-cache/
+SDL.zig/deps.zig
+SDL.zig/gyro.lock
+SDL.zig/.build_config
+SDL.zig/examples

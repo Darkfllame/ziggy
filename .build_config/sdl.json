@@ -1,0 +1,12 @@
+{
+    "x86_64-windows-gnu": {
+        "include": "./SDK/SDL2/x64/include",
+        "libs": "./SDK/SDL2/x64/lib",
+        "bin": "./SDK/SDL2/x64/bin"
+    },
+    "x86-windows-gnu": {
+        "include": "./SDK/SDL2/x86/include",
+        "libs": "./SDK/SDL2/x86/lib",
+        "bin": "./SDK/SDL2/x86/bin"
+    }
+}
