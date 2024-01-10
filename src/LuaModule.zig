@@ -179,9 +179,9 @@ fn argumentGuard(lua: *Lua, comptime options: ArgumentGuardOptions, arguments: [
         .greaterEqual => !(argc >= options.expectedArgc),
     })
         lua_raiseErrorFmt(lua, "Expected {[exp]d} argument{[punc]s}, got {[argc]d}", .{
-            .exp = arguments.len,
+            .exp = options.expectedArgc,
             .argc = argc,
-            .punc = if (arguments.len > 1) "s" else "",
+            .punc = if (options.expectedArgc > 1) "s" else "",
         });
 
     for (arguments, 1..) |arg_type, i| {
@@ -517,10 +517,14 @@ fn l_renderer__index(lua: *Lua) i32 {
             const message = index.getError();
             lua_raiseErrorFmt(lua, "[ERROR | {any}] {s}", .{ e, message });
         }),
-        hash("fillRect") => pushAny(lua, l_renderer_fillRect),
+        hash("fillRect") => pushAny(lua, l_renderer_fillrect),
         hash("drawRect") => pushAny(lua, l_renderer_drawrect),
         hash("drawLine") => pushAny(lua, l_renderer_drawline),
         hash("drawPoint") => pushAny(lua, l_renderer_drawpoint),
+        hash("fillRects") => pushAny(lua, l_renderer_fillrects),
+        hash("drawRects") => pushAny(lua, l_renderer_drawrects),
+        hash("drawLines") => pushAny(lua, l_renderer_drawlines),
+        hash("drawPoints") => pushAny(lua, l_renderer_drawpoints),
         else => lua.raiseErrorStr("Cannot find field '{s}' from ZGE.Renderer object", .{field}),
     }
     return 1;
@@ -597,7 +601,7 @@ fn l_renderer__newindex(lua: *Lua) i32 {
     }
     return 0;
 }
-fn l_renderer_fillRect(lua: *Lua) i32 {
+fn l_renderer_fillrect(lua: *Lua) i32 {
     argumentGuard(lua, .{
         .expectedArgc = 5,
     }, &.{
@@ -694,6 +698,220 @@ fn l_renderer_drawpoint(lua: *Lua) i32 {
         const message = index.getError();
         lua_raiseErrorFmt(lua, "{s}", .{message});
     };
+    return 0;
+}
+fn l_renderer_fillrects(lua: *Lua) i32 {
+    argumentGuard(lua, .{
+        .expectedArgc = 2,
+    }, &.{
+        .userdata,
+        .table,
+    });
+
+    const allocator = std.heap.c_allocator;
+
+    const renderer = checkArgumentUserdata(lua, *Game.Renderer, 1, "ZGE.Renderer").*;
+    lua.len(-1);
+    const len: i32 = @intCast(lua.toInteger(-1) catch unreachable);
+    lua.pop(1);
+    if (@mod(len, 4) != 0) {
+        lua_raiseErrorFmt(lua, "Expected a length of a multiple of 2, got length {d}", .{len});
+    }
+    const rects = allocator.alloc(gameContext.Rect, @intCast(@divFloor(len, 4))) catch {
+        lua_raiseErrorFmt(lua, "Cannot allocate memory", .{});
+    };
+    for (0..rects.len) |i| {
+        if (lua.getIndex(2, @intCast(i * 4 + 1)) != .number) {
+            allocator.free(rects);
+            lua_raiseErrorFmt(lua, "Expected table at index 1, got {s}", .{lua.typeName(lua.typeOf(-1))});
+        }
+        if (lua.getIndex(2, @intCast(i * 4 + 2)) != .number) {
+            allocator.free(rects);
+            lua_raiseErrorFmt(lua, "Expected table at index 2, got {s}", .{lua.typeName(lua.typeOf(-1))});
+        }
+        if (lua.getIndex(2, @intCast(i * 4 + 3)) != .number) {
+            allocator.free(rects);
+            lua_raiseErrorFmt(lua, "Expected table at index 3, got {s}", .{lua.typeName(lua.typeOf(-1))});
+        }
+        if (lua.getIndex(2, @intCast(i * 4 + 4)) != .number) {
+            allocator.free(rects);
+            lua_raiseErrorFmt(lua, "Expected table at index 4, got {s}", .{lua.typeName(lua.typeOf(-1))});
+        }
+        const x = lua.toInteger(-4) catch unreachable;
+        const y = lua.toInteger(-3) catch unreachable;
+        const w = lua.toInteger(-2) catch unreachable;
+        const h = lua.toInteger(-1) catch unreachable;
+        rects[i] = .{
+            .x = @intCast(x),
+            .y = @intCast(y),
+            .w = @intCast(w),
+            .h = @intCast(h),
+        };
+    }
+    renderer.fillRects(rects) catch {
+        const message = index.getError();
+        allocator.free(rects);
+        lua_raiseErrorFmt(lua, "{s}", .{message});
+    };
+    allocator.free(rects);
+    return 0;
+}
+fn l_renderer_drawrects(lua: *Lua) i32 {
+    argumentGuard(lua, .{
+        .expectedArgc = 2,
+    }, &.{
+        .userdata,
+        .table,
+    });
+
+    const allocator = std.heap.c_allocator;
+
+    const renderer = checkArgumentUserdata(lua, *Game.Renderer, 1, "ZGE.Renderer").*;
+    lua.len(-1);
+    const len: i32 = @intCast(lua.toInteger(-1) catch unreachable);
+    lua.pop(1);
+    if (@mod(len, 4) != 0) {
+        lua_raiseErrorFmt(lua, "Expected a length of a multiple of 2, got length {d}", .{len});
+    }
+    const rects = allocator.alloc(gameContext.Rect, @intCast(@divFloor(len, 4))) catch {
+        lua_raiseErrorFmt(lua, "Cannot allocate memory", .{});
+    };
+    for (0..rects.len) |i| {
+        if (lua.getIndex(2, @intCast(i * 4 + 1)) != .number) {
+            allocator.free(rects);
+            lua_raiseErrorFmt(lua, "Expected table at index 1, got {s}", .{lua.typeName(lua.typeOf(-1))});
+        }
+        if (lua.getIndex(2, @intCast(i * 4 + 2)) != .number) {
+            allocator.free(rects);
+            lua_raiseErrorFmt(lua, "Expected table at index 2, got {s}", .{lua.typeName(lua.typeOf(-1))});
+        }
+        if (lua.getIndex(2, @intCast(i * 4 + 3)) != .number) {
+            allocator.free(rects);
+            lua_raiseErrorFmt(lua, "Expected table at index 3, got {s}", .{lua.typeName(lua.typeOf(-1))});
+        }
+        if (lua.getIndex(2, @intCast(i * 4 + 4)) != .number) {
+            allocator.free(rects);
+            lua_raiseErrorFmt(lua, "Expected table at index 4, got {s}", .{lua.typeName(lua.typeOf(-1))});
+        }
+        const x = lua.toInteger(-4) catch unreachable;
+        const y = lua.toInteger(-3) catch unreachable;
+        const w = lua.toInteger(-2) catch unreachable;
+        const h = lua.toInteger(-1) catch unreachable;
+        rects[i] = .{
+            .x = @intCast(x),
+            .y = @intCast(y),
+            .w = @intCast(w),
+            .h = @intCast(h),
+        };
+    }
+    renderer.drawRects(rects) catch {
+        const message = index.getError();
+        allocator.free(rects);
+        lua_raiseErrorFmt(lua, "{s}", .{message});
+    };
+    allocator.free(rects);
+    return 0;
+}
+fn l_renderer_drawlines(lua: *Lua) i32 {
+    argumentGuard(lua, .{
+        .expectedArgc = 2,
+    }, &.{
+        .userdata,
+        .table,
+    });
+
+    const allocator = std.heap.c_allocator;
+
+    const renderer = checkArgumentUserdata(lua, *Game.Renderer, 1, "ZGE.Renderer").*;
+    lua.len(-1);
+    const len: i32 = @intCast(lua.toInteger(-1) catch unreachable);
+    lua.pop(1);
+    if (@mod(len, 4) != 0) {
+        lua_raiseErrorFmt(lua, "Expected a length of a multiple of 2, got length {d}", .{len});
+    }
+    const points = allocator.alloc(gameContext.Point, @intCast(@divFloor(len, 2))) catch {
+        lua_raiseErrorFmt(lua, "Cannot allocate memory", .{});
+    };
+    for (0..points.len) |i| {
+        if (lua.getIndex(2, @intCast(i * 2 + 1)) != .number) {
+            allocator.free(points);
+            lua_raiseErrorFmt(lua, "Expected table at index 1, got {s}", .{lua.typeName(lua.typeOf(-1))});
+        }
+        if (lua.getIndex(2, @intCast(i * 2 + 2)) != .number) {
+            allocator.free(points);
+            lua_raiseErrorFmt(lua, "Expected table at index 2, got {s}", .{lua.typeName(lua.typeOf(-1))});
+        }
+        if (lua.getIndex(2, @intCast(i * 2 + 3)) != .number) {
+            allocator.free(points);
+            lua_raiseErrorFmt(lua, "Expected table at index 3, got {s}", .{lua.typeName(lua.typeOf(-1))});
+        }
+        if (lua.getIndex(2, @intCast(i * 2 + 3)) != .number) {
+            allocator.free(points);
+            lua_raiseErrorFmt(lua, "Expected table at index 4, got {s}", .{lua.typeName(lua.typeOf(-1))});
+        }
+        const x = lua.toInteger(-4) catch unreachable;
+        const y = lua.toInteger(-3) catch unreachable;
+        const x2 = lua.toInteger(-2) catch unreachable;
+        const y2 = lua.toInteger(-1) catch unreachable;
+        points[i] = .{
+            .x = @intCast(x),
+            .y = @intCast(y),
+        };
+        points[i + 1] = .{
+            .x = @intCast(x2),
+            .y = @intCast(y2),
+        };
+    }
+    renderer.drawLines(points) catch {
+        const message = index.getError();
+        allocator.free(points);
+        lua_raiseErrorFmt(lua, "{s}", .{message});
+    };
+    allocator.free(points);
+    return 0;
+}
+fn l_renderer_drawpoints(lua: *Lua) i32 {
+    argumentGuard(lua, .{
+        .expectedArgc = 2,
+    }, &.{
+        .userdata,
+        .table,
+    });
+
+    const allocator = std.heap.c_allocator;
+
+    const renderer = checkArgumentUserdata(lua, *Game.Renderer, 1, "ZGE.Renderer").*;
+    lua.len(-1);
+    const len: i32 = @intCast(lua.toInteger(-1) catch unreachable);
+    lua.pop(1);
+    if (@mod(len, 2) != 0) {
+        lua_raiseErrorFmt(lua, "Expected a length of a multiple of 2, got length {d}", .{len});
+    }
+    const points = allocator.alloc(gameContext.Point, @intCast(@divFloor(len, 2))) catch {
+        lua_raiseErrorFmt(lua, "Cannot allocate memory", .{});
+    };
+    for (points, 0..) |*p, i| {
+        if (lua.getIndex(2, @intCast(i * 2 + 1)) != .number) {
+            allocator.free(points);
+            lua_raiseErrorFmt(lua, "Expected table at index {d}, got {s}", .{ i, lua.typeName(lua.typeOf(-1)) });
+        }
+        if (lua.getIndex(2, @intCast(i * 2 + 2)) != .number) {
+            allocator.free(points);
+            lua_raiseErrorFmt(lua, "Expected table at index {d}, got {s}", .{ i, lua.typeName(lua.typeOf(-1)) });
+        }
+        const x = lua.toInteger(-2) catch unreachable;
+        const y = lua.toInteger(-1) catch unreachable;
+        p.* = .{
+            .x = @intCast(x),
+            .y = @intCast(y),
+        };
+    }
+    renderer.drawPoints(points) catch {
+        const message = index.getError();
+        allocator.free(points);
+        lua_raiseErrorFmt(lua, "{s}", .{message});
+    };
+    allocator.free(points);
     return 0;
 }
 

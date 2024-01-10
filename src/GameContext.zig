@@ -596,7 +596,7 @@ const GameRenderer = struct {
     pub fn drawRect(self: *GameRenderer, rect: Rect) Error!void {
         try checkError(
             Error,
-            sdl.SDL_RenderDrawRect(self.renderer, rect2sdl(rect)),
+            sdl.SDL_RenderDrawRect(self.renderer, &rect2sdl(rect)),
             "Cannot draw rectangle",
             Error.SdlError,
         );
@@ -604,7 +604,7 @@ const GameRenderer = struct {
     pub fn drawRects(self: *GameRenderer, rects: []const Rect) Error!void {
         try checkError(
             Error,
-            sdl.SDL_RenderDrawRects(self.renderer, @ptrCast(rects.ptr), rects.len),
+            sdl.SDL_RenderDrawRects(self.renderer, @ptrCast(rects.ptr), @intCast(rects.len)),
             "Cannot draw rectangles",
             Error.SdlError,
         );
@@ -630,7 +630,7 @@ const GameRenderer = struct {
     pub fn drawPoint(self: *GameRenderer, point: Point) Error!void {
         try checkError(
             Error,
-            sdl.SDL_RenderDrawPoint(self.renderer, &point2sdl(point)),
+            sdl.SDL_RenderDrawPoint(self.renderer, @intCast(point.x), @intCast(point.y)),
             "Cannot draw point",
             Error.SdlError,
         );
@@ -661,7 +661,7 @@ const GameRenderer = struct {
     pub fn drawLines(self: *GameRenderer, points: []const Point) Error!void {
         try checkError(
             Error,
-            sdl.SDL_RenderDrawLine(self.renderer, @ptrCast(points.ptr), @intCast(points.len)),
+            sdl.SDL_RenderDrawLines(self.renderer, @ptrCast(points.ptr), @intCast(points.len)),
             "Cannot draw line",
             Error.SdlError,
         );
