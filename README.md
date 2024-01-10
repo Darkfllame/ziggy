@@ -47,6 +47,15 @@ if you want the entire API, there it is:
 - > :fillRect(x, y, w, h) : void
   >
   > Fill a rectangle on the screen (x, y from the bottom left)
+- > :drawRect(x, y, w, h) : void
+  >
+  > Draw a rectangle on the screen (x, y from the bottom left)
+- > :drawLine(x, y, x2, y2) : void
+  >
+  > Draw a line on the screen (x, y from the bottom left)
+- > :drawPoint(x, y) : void
+  >
+  > Draw a pixel on the screen (x, y from the bottom left)
 - > color : {r: number = 0, g: number = 0, b: number = 0, a: number = 255}
   >
   > Sets the color of the renderer (can be combined with drawing functions)

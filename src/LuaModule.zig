@@ -518,6 +518,9 @@ fn l_renderer__index(lua: *Lua) i32 {
             lua_raiseErrorFmt(lua, "[ERROR | {any}] {s}", .{ e, message });
         }),
         hash("fillRect") => pushAny(lua, l_renderer_fillRect),
+        hash("drawRect") => pushAny(lua, l_renderer_drawrect),
+        hash("drawLine") => pushAny(lua, l_renderer_drawline),
+        hash("drawPoint") => pushAny(lua, l_renderer_drawpoint),
         else => lua.raiseErrorStr("Cannot find field '{s}' from ZGE.Renderer object", .{field}),
     }
     return 1;
@@ -617,6 +620,79 @@ fn l_renderer_fillRect(lua: *Lua) i32 {
     }) catch |e| {
         const message = index.getError();
         lua_raiseErrorFmt(lua, "[ERROR | {any}] {s}", .{ e, message });
+    };
+    return 0;
+}
+fn l_renderer_drawrect(lua: *Lua) i32 {
+    argumentGuard(lua, .{
+        .expectedArgc = 5,
+    }, &.{
+        .userdata,
+        .number,
+        .number,
+        .number,
+        .number,
+    });
+    const renderer = checkArgumentUserdata(lua, *Game.Renderer, 1, "ZGE.Renderer").*;
+    const x = lua.toInteger(2) catch unreachable;
+    const y = lua.toInteger(3) catch unreachable;
+    const w = lua.toInteger(4) catch unreachable;
+    const h = lua.toInteger(5) catch unreachable;
+    renderer.drawRect(.{
+        .x = @intCast(x),
+        .y = @intCast(y),
+        .w = @intCast(w),
+        .h = @intCast(h),
+    }) catch {
+        const message = index.getError();
+        lua_raiseErrorFmt(lua, "{s}", .{message});
+    };
+    return 0;
+}
+fn l_renderer_drawline(lua: *Lua) i32 {
+    argumentGuard(lua, .{
+        .expectedArgc = 5,
+    }, &.{
+        .userdata,
+        .number,
+        .number,
+        .number,
+        .number,
+    });
+    const renderer = checkArgumentUserdata(lua, *Game.Renderer, 1, "ZGE.Renderer").*;
+    const x = lua.toInteger(2) catch unreachable;
+    const y = lua.toInteger(3) catch unreachable;
+    const x2 = lua.toInteger(4) catch unreachable;
+    const y2 = lua.toInteger(5) catch unreachable;
+    renderer.drawLine(.{
+        .x = @intCast(x),
+        .y = @intCast(y),
+    }, .{
+        .x = @intCast(x2),
+        .y = @intCast(y2),
+    }) catch {
+        const message = index.getError();
+        lua_raiseErrorFmt(lua, "{s}", .{message});
+    };
+    return 0;
+}
+fn l_renderer_drawpoint(lua: *Lua) i32 {
+    argumentGuard(lua, .{
+        .expectedArgc = 3,
+    }, &.{
+        .userdata,
+        .number,
+        .number,
+    });
+    const renderer = checkArgumentUserdata(lua, *Game.Renderer, 1, "ZGE.Renderer").*;
+    const x = lua.toInteger(2) catch unreachable;
+    const y = lua.toInteger(3) catch unreachable;
+    renderer.drawPoint(.{
+        .x = @intCast(x),
+        .y = @intCast(y),
+    }) catch {
+        const message = index.getError();
+        lua_raiseErrorFmt(lua, "{s}", .{message});
     };
     return 0;
 }
