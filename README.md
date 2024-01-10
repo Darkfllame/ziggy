@@ -2,7 +2,7 @@
 Dumb ass project. Just a zig game engine with lua implementation
 ## Lua implementation
 You can add update & render callbacks with the `game.AddUpdateCallback` and `game.AddRenderCallback` functions respectively,
-if you want the entire API, there it is: (not finished)
+if you want the entire API, there it is:
 
 game : ZGE.Game
 - > AddUpdateCallback(fn) : void
